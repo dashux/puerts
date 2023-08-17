@@ -120,7 +120,7 @@ if ( NOT CMAKE_BUILD_TYPE MATCHES "Release" )
     target_compile_definitions (puerts PRIVATE PUERTS_DEBUG)
 endif ()
 
-# 打开手机版本puerts的调试开关
+# 打开手机版本puerts的调试模块
 target_compile_definitions (puerts PRIVATE WITH_INSPECTOR)
 
 if ( MSYS OR WIN32 )
