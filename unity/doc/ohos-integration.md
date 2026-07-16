@@ -123,7 +123,21 @@ fujian 的游戏 JS（`main.cjs`）在 Android/iOS 上依赖 Node 运行时（�
 3. **入口文件加载**：fujian 的 `RemoteLoader` 用 `Application.persistentDataPath` 读热更 `main.cjs`、`Resources` 读内置模块——这两条路径在 OHOS 上行为与 Android 一致，无需改造。
 4. **验证顺序建议**：先用 Unity 侧冒烟（第五节）确认引擎层 OK → 再出 ohos bundle 跑到登录/大厅 → 最后长链路（mqtt 对局）联调。
 
-## 七、已知限制
+## 七、当前验证状态（2026-07-16）
+
+| 验证项 | 状态 |
+|---|---|
+| OHOS arm64 交叉编译、链接（v8 whole-archive） | ✅ 通过 |
+| so 导出符号完整性（PuertsDLL.cs 全部 90 个 P/Invoke 入口） | ✅ 通过 |
+| so 运行时依赖（仅 libc++_shared.so + libc.so） | ✅ 通过 |
+| 团结编辑器导入插件（.meta 生效、仅 OpenHarmony 平台启用） | ✅ 通过 |
+| 团结 OpenHarmony 出包（il2cpp + hvigor + 默认签名 HAP，含冒烟场景） | ✅ 通过 |
+| HAP 内容核对（libpuerts.so / libc++_shared.so 已打入） | ✅ 通过 |
+| **真机运行冒烟测试（JsEnv/Eval/互调/setTimeout）** | ⏳ **待执行**（暂无鸿蒙测试机；设备就绪后按第五节命令安装 `unity/build/ohos/entry-default-signed.hap` 即可，无需重新构建） |
+
+无真机时的备选验证途径：DevEco Studio 自带的 OpenHarmony 模拟器（arm64 镜像，需安装 DevEco Studio 并登录华为账号）。
+
+## 八、已知限制
 
 - 仅 arm64-v8a（HarmonyOS 5 真机均为 arm64；如需模拟器 x86_64 或 armv7 可按 make.mts 模式自行补充，后端包内有对应 libwee8.a）。
 - jitless 模式下无 WebAssembly、JS 执行性能低于带 JIT 的 Android（与 iOS 同档）。
