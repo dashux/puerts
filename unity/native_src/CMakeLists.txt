@@ -135,6 +135,25 @@ if ( MSYS OR WIN32 )
     # definition
     target_compile_definitions (puerts PRIVATE PLATFORM_WINDOWS)
 
+elseif ( OHOS )
+
+    set(BACKEND_LIB_NAMES "-Wl,--whole-archive$<SEMICOLON>${BACKEND_LIB_NAMES}$<SEMICOLON>-Wl,--no-whole-archive")
+
+    # definition
+    target_compile_definitions (puerts PRIVATE PLATFORM_OHOS)
+    if ( OHOS_ARCH STREQUAL "armeabi-v7a")
+        target_compile_definitions (puerts PRIVATE PLATFORM_OHOS_ARM)
+    elseif ( OHOS_ARCH STREQUAL "arm64-v8a")
+        target_compile_definitions (puerts PRIVATE PLATFORM_OHOS_ARM64)
+    else ()
+        target_compile_definitions (puerts PRIVATE PLATFORM_OHOS_x64)
+    endif ()
+
+    add_custom_command(TARGET puerts POST_BUILD
+            COMMAND "${CMAKE_STRIP}" -g -S -d --strip-debug
+            "${CMAKE_BINARY_DIR}/libpuerts.so"
+            COMMENT "Strip debug symbols done on final binary.")
+
 elseif ( ANDROID )
 
     find_library(log-lib log)

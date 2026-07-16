@@ -15,4 +15,17 @@
 /native_src/quickjs*
 /native_src/puerts-cpp-tester
 /native_src/build*
+/native_src/node_modules
 /node_modules
+
+# 编辑器生成物（demo 工程用团结引擎打开时产生）
+/Library
+/Packages
+/Temp
+/Logs
+/UserSettings
+/ProjectSettings
+/build
+/Assets/**/*.meta
+!/Assets/Puerts/Plugins/OpenHarmony.meta
+!/Assets/Puerts/Plugins/OpenHarmony/**/*.meta

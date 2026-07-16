@@ -194,15 +194,18 @@ namespace puerts
         Flags += " --jitless --no-expose-wasm";
 #endif
 #endif
-#if PLATFORM_IOS
+#if defined(PLATFORM_IOS) || defined(PLATFORM_OHOS)
         Flags += " --jitless --no-expose-wasm";
 #endif
         v8::V8::SetFlagsFromString(Flags.c_str(), static_cast<int>(Flags.size()));
 
+#if !defined(PLATFORM_OHOS)
+        // OHOS 后端包（V8_9.4.146.24_240430）的 libwee8.a 已内嵌 snapshot，无 Blob 头文件，走 v8 默认 snapshot
         v8::StartupData SnapshotBlob;
         SnapshotBlob.data = (const char *)SnapshotBlobCode;
         SnapshotBlob.raw_size = sizeof(SnapshotBlobCode);
         v8::V8::SetSnapshotDataBlob(&SnapshotBlob);
+#endif
 
         // 初始化Isolate和DefaultContext
         CreateParams = new v8::Isolate::CreateParams();

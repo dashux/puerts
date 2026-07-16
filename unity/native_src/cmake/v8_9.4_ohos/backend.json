@@ -1,0 +1,10 @@
+{
+    "include": ["/Inc"],
+    "link": {
+        "ohos": {
+            "arm64": ["/Lib/OHOS/arm64-v8a/libwee8.a"],
+            "armv7": ["/Lib/OHOS/armeabi-v7a/libwee8.a"]
+        }
+    },
+    "copy": {}
+}

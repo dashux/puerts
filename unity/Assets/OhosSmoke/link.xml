@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="UnityEngine.CoreModule">
+    <type fullname="UnityEngine.Debug" preserve="all"/>
+    <type fullname="UnityEngine.Application" preserve="all"/>
+  </assembly>
+  <assembly fullname="com.tencent.puerts.core" preserve="all"/>
+</linker>

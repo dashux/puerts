@@ -15,7 +15,7 @@ const nodePlatformToPuerPlatform = {
 }
 interface BuildOptions {
     config: 'Debug' | 'Release' | "RelWithDebInfo",
-    platform: 'osx' | 'win' | 'ios' | 'android' | 'linux',
+    platform: 'osx' | 'win' | 'ios' | 'android' | 'linux' | 'ohos',
     arch: 'x64' | 'ia32' | 'armv7' | 'arm64' | 'auto',
     backend: string
 }
@@ -61,6 +61,26 @@ const platformCompileConfig = {
 
                 assert.equal(0, exec(`cmake ${cmakeDArgs} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DJS_ENGINE=${options.backend} -DCMAKE_BUILD_TYPE=${options.config} -DANDROID_ABI=${ABI} -H. -B${CMAKE_BUILD_PATH} -DCMAKE_TOOLCHAIN_FILE=${NDK}/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=${API} -DANDROID_TOOLCHAIN=clang -DANDROID_TOOLCHAIN_NAME=${TOOLCHAIN_NAME}`).code)
                 assert.equal(0, exec(`cmake --build ${CMAKE_BUILD_PATH} --config ${options.config}`).code)
+
+                return `${CMAKE_BUILD_PATH}/libpuerts.so`
+            }
+        }
+    },
+    'ohos': {
+        'arm64': {
+            outputPluginPath: 'OpenHarmony/libs/arm64-v8a/',
+            hook: function (CMAKE_BUILD_PATH: string, options: BuildOptions, cmakeDArgs: string) {
+                // OHOS_NDK 指向 OpenHarmony native SDK 根目录（含 build/cmake/ohos.toolchain.cmake）
+                // 团结引擎自带：<团结安装目录>/PlaybackEngines/OpenHarmonyPlayer/SDK/<api>/native
+                const NDK = process.env.OHOS_NDK || process.env.OHOS_NDK_HOME;
+                if (!NDK) throw new Error("please set OHOS_NDK environment variable first!");
+                const ABI = 'arm64-v8a';
+                const cmake_bin_path = `${NDK}/build-tools/cmake/bin/cmake`;
+                const ninja_bin_path = `${NDK}/build-tools/cmake/bin/ninja`;
+                const toolchain_file = `${NDK}/build/cmake/ohos.toolchain.cmake`;
+
+                assert.equal(0, exec(`"${cmake_bin_path}" ${cmakeDArgs} -GNinja -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DJS_ENGINE=${options.backend} -DCMAKE_BUILD_TYPE=${options.config} -DOHOS_ARCH=${ABI} -H. -B"${CMAKE_BUILD_PATH}" -DOHOS_PLATFORM=OHOS -DCMAKE_TOOLCHAIN_FILE="${toolchain_file}" -DCMAKE_MAKE_PROGRAM="${ninja_bin_path}"`).code)
+                assert.equal(0, exec(`"${cmake_bin_path}" --build ${CMAKE_BUILD_PATH} --config ${options.config}`).code)
 
                 return `${CMAKE_BUILD_PATH}/libpuerts.so`
             }
@@ -215,7 +235,7 @@ if (import.meta.url.startsWith('file:') && process.argv[1] === __filename) {
     program.addOption(
         new Option("--platform <platform>", "the target platform")
             .default("")
-            .choices(["win", "osx", "linux", "android", "ios"])
+            .choices(["win", "osx", "linux", "android", "ios", "ohos"])
     );
     program.addOption(
         new Option("--arch <arch>", "the target architecture")
@@ -230,7 +250,7 @@ if (import.meta.url.startsWith('file:') && process.argv[1] === __filename) {
     program.option("--backend <backend>", "the JS backend will be used", "v8");
     
     let pargv = process.argv;
-    if (process.argv[2].match(/[vnq][aiwol][3678]d?/)) {
+    if (process.argv[2].match(/[vnq][aiwolh][3678]d?/)) {
         const command = process.argv[2];
         pargv = [pargv[0], pargv[1]];
     
@@ -259,7 +279,9 @@ if (import.meta.url.startsWith('file:') && process.argv[1] === __filename) {
                 pargv.push('osx'); break;
             case 'l':
                 pargv.push('linux'); break;
-    
+            case 'h':
+                pargv.push('ohos'); break;
+
             default:
                 throw new Error(`invalid command[1] : ${command[1]}`);
         }
