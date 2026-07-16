@@ -71,6 +71,7 @@ node make.mts --platform ohos --arch arm64 --backend v8_9.4_ohos --config Releas
 | CommonJS `require` | Node 原生 | puerts 的 cjsload/modular 实现，走 ILoader 解析 |
 | Node 内置模块（fs/net/http/buffer/crypto/ws...） | 可用 | **不可用**——业务 JS 需要按附录改造打包 target |
 | JIT | 有 | 无（jitless，同 iOS 档位） |
+| `Intl` 国际化 API | 可用（node16 带 ICU） | **不可用**（v8_bin 为 no-intl 构建，`typeof Intl === 'undefined'`；`toLocaleString` 等退化为默认行为不抛错，但 `new Intl.DateTimeFormat()` 会 ReferenceError——业务 JS 如有使用需自查） |
 | 调试 | inspector | inspector 保留（`WITH_INSPECTOR` 已编入）：`new JsEnv(loader, 9222)` 后 `hdc fport tcp:9222 tcp:9222`，Chrome `devtools://` 连接 |
 
 ## 五、冒烟验证（demo 工程）
@@ -133,9 +134,10 @@ fujian 的游戏 JS（`main.cjs`）在 Android/iOS 上依赖 Node 运行时（�
 | 团结编辑器导入插件（.meta 生效、仅 OpenHarmony 平台启用） | ✅ 通过 |
 | 团结 OpenHarmony 出包（il2cpp + hvigor + 默认签名 HAP，含冒烟场景） | ✅ 通过 |
 | HAP 内容核对（libpuerts.so / libc++_shared.so 已打入） | ✅ 通过 |
-| **真机运行冒烟测试（JsEnv/Eval/互调/setTimeout）** | ⏳ **待执行**（暂无鸿蒙测试机；设备就绪后按第五节命令安装 `unity/build/ohos/entry-default-signed.hap` 即可，无需重新构建） |
+| **v8 引擎运行时全链路**（dlopen、内嵌 snapshot、CreateJSEngine、Eval、ES2020、Promise microtask，ApiLevel=19/Backend=0） | ✅ 通过（Docker musl/aarch64 容器实测，方法见 `native_src/ohos-container-smoke/`） |
+| **真机运行冒烟测试（JsEnv/JS↔C# 互调/setTimeout，团结运行时集成）** | ⏳ **待执行**（暂无鸿蒙测试机；设备就绪后按第五节命令安装 `unity/build/ohos/entry-default-signed.hap` 即可，无需重新构建） |
 
-无真机时的备选验证途径：DevEco Studio 自带的 OpenHarmony 模拟器（arm64 镜像，需安装 DevEco Studio 并登录华为账号）。
+无真机时的其他验证途径：DevEco Studio 自带的 OpenHarmony 模拟器（arm64 镜像，需安装 DevEco Studio 并登录华为账号），或华为云真机（DevEco/AGC 远程真机，需开发者账号实名）。
 
 ## 八、已知限制
 
